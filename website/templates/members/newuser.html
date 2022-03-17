@@ -1,0 +1,194 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+
+    function toggleOnSubmit(){
+        document.getElementById("loader").classList.toggle("hidden")
+        document.getElementById("btnAddUser").classList.toggle("hidden")
+    }
+
+    function addUser()
+    {
+        userFName = document.getElementById("userFName").value;
+        userLName = document.getElementById("userLName").value;
+        userEmail = document.getElementById("userEmail").value;
+        userCredit = document.getElementById("userCredit").value;
+        result = document.getElementById("result");
+
+        if(userLName =='' || userFName == '' || userEmail == '')
+        {
+            result.innerHTML = `<i class="fas fa-exclamation-circle text-red-700"></i> Please Fill All Details`;
+        }
+        else if (userCredit <100 )
+        {
+            result.innerHTML = `<i class="fas fa-exclamation-circle text-red-700"></i> Minimum Credit is <i class="fas fa-rupee-sign"></i>100`;
+        }
+        else
+        {
+            toggleOnSubmit()
+            fetch('/members/add' , {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: userFName+' '+userLName,
+                    email: userEmail,
+                    credit: userCredit
+                })
+            }).then(function (response) {
+                console.log(response)
+                return response.json()
+            }).then(function (data)
+            {
+                if(data.result == 200)
+                {
+                    result.innerHTML = `User Created`;
+                    document.getElementById("userTable").innerHTML += `<tr id="${data.user.id}" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+                        <td class="border-blue-900 border p-2 text-center">${data.user.id}</td>
+                        <td class="border-blue-900 border p-2 text-center">${data.user.name}</td>
+                        <td class="border-blue-900 border p-2 text-center">${data.user.email}</td>
+                        <td class="border-blue-900 border p-2 text-center">${data.user.credit}</td>
+                      </tr>`
+                }
+                else
+                {
+                    result.innerHTML = `<i class="fas fa-exclamation-circle text-red-700"></i> Error - ${data.result}`;
+                }
+                    toggleOnSubmit()
+            });
+        }
+    }
+
+    document.getElementById("newUser").classList.remove("bg-blue-900")
+    document.getElementById("newUser").classList.add("bg-blue-500")
+    document.getElementById("newUser-icon").classList.remove("text-blue-600")
+
+    function decrement(e) 
+    {
+      const btn = e.target.parentNode.parentElement.querySelector(
+        'button[data-action="decrement"]'
+      );
+      const target = btn.nextElementSibling;
+      let value = Number(target.value);
+        if (value > 100){
+            value = value-100;
+            target.value = value;
+        }
+    }
+  
+    function increment(e) {
+      const btn = e.target.parentNode.parentElement.querySelector(
+        'button[data-action="decrement"]'
+      );
+      const target = btn.nextElementSibling;
+      let value = Number(target.value);
+      value += 100;
+      target.value = value;
+    }
+  
+    const decrementButtons = document.querySelectorAll(
+      `button[data-action="decrement"]`
+    );
+  
+    const incrementButtons = document.querySelectorAll(
+      `button[data-action="increment"]`
+    );
+  
+    decrementButtons.forEach(btn => {
+      btn.addEventListener("click", decrement);
+    });
+  
+    incrementButtons.forEach(btn => {
+      btn.addEventListener("click", increment);
+    });
+  </script>
+{% endblock %}
+
+{% block title %}
+Add User
+{% endblock %}
+
+{% block content %}
+
+<div class="mt-2 mx-2 text-xl text-black divide-y-2 divide-dashed divide-blue-900">
+    <div></div>
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="fname" class="font-bold ">First Name:</label>
+        <input id="userFName"
+            class="text-black w-full md:w-2/3 py-2 border-blue-900 px-2 rounded-lg border-2 border-solid focus:border-double focus:border-4"
+            type="text" placeholder="User First Name">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="lname" class="mr-1 font-bold ">Last Name:</label>
+        <input id="userLName"
+            class="text-black w-full md:w-2/3 py-2 border-blue-900 px-2 rounded-lg border-2 border-solid focus:border-double focus:border-4"
+            type="text" placeholder="User Last Name">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="email" class="mr-1 font-bold ">Email Id:</label>
+        <input id="userEmail"
+            class="text-black w-full md:w-2/3 py-2 border-blue-900 px-2 rounded-lg border-2  border-solid focus:border-double focus:border-4"
+            type="email" placeholder="User Email Id">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+
+        <div >
+            <label for="credit" class="font-bold">Credit:</label>
+        </div>
+        <!-- component -->
+        <div class="w-full md:w-2/3 flex flex-col md:flex-row justify-between">
+            <div class="w-full md:w-1/2 flex flex-row h-10 rounded-lg relative bg-transparent mt-2 md:mt-0">
+                <button data-action="decrement"
+                    class=" bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-l cursor-pointer outline-none">
+                    <span class="m-auto text-2xl font-bold">−</span>
+                </button>
+                <input type="number" id="userCredit"
+                    class="outline-none focus:outline-none text-center w-full bg-blue-200 font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center text-blue-700  outline-none"
+                    name="custom-input-number" value="100">
+                <button data-action="increment"
+                    class="bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-r cursor-pointer">
+                    <span class="m-auto text-2xl font-bold">+</span>
+                </button>
+            </div>
+            <span class="inline content-center text-center">Minimum Credit <i class="fas fa-rupee-sign"></i>100</span>
+        </div>
+
+    </div>
+
+    <div id="btnAddUser" class="flex justify-center my-2 items-center pt-4">
+        <button onclick="addUser()" class="w-3/5 border-2 py-2 border-blue-900 font-bold text-xl rounded-full hover:bg-blue-900 hover:text-white">
+            Add User</button>
+    </div>
+
+</div>
+
+<div id="loader" class="hidden my-2">
+    <div class="w-3/4 mx-auto flex flex-col bg-blue-900 md:flex-row lg:flex-row items-center justify-center px-4 py-2 border border-transparent text-2xl font-bold rounded-full text-white 
+transition ease-in-out duration-150 cursor-not-allowed">
+<div class="mr-2">Processing</div>
+<div><svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg></div>
+</div>
+</div>
+
+<div  class="w-full text-center text-lg bg-blue-100 py-2 rounded-md">
+    <span id="result">Result will appear here</span>
+    <table id="userTable"></table>
+</div>
+
+<style>
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
+
+{% endblock %}

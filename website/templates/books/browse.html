@@ -1,0 +1,121 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+
+    function BtnDisable(value)
+    {
+        document.getElementById("bookBtnOne").disabled = value
+        document.getElementById("bookBtnTwo").disabled = value
+    }
+
+    var page_number = 1
+    getBooks(0)
+    document.getElementById("browse").classList.remove("bg-blue-900")
+    document.getElementById("browse").classList.add("bg-blue-500")
+    document.getElementById("browse-icon").classList.remove("text-blue-600")
+
+    function getBooks(change)
+    {
+        BtnDisable(true)
+        if(change + page_number > 0)
+        {
+        document.getElementById("booksContent").innerHTML = ''
+        document.getElementById("loader").style.display = "inline"
+        page_number += change
+        document.getElementById("pageNumber").innerHTML = page_number
+        fetch("/api/get_books?page="+page_number+"&title="+document.getElementById("title").value+"&authors="+document.getElementById("author").value, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          }).then(function (response)
+           {
+               return response.json();
+          }).then(function (data) 
+          {
+            if(data.length >0)
+            {
+                for (var i = 0; i < data.length; i++)
+            {
+                book = data[i]
+                document.getElementById("loader").style.display = "none"
+                document.getElementById("booksContent").innerHTML += `<a href="book/`+ book.bookID +`" class="w-full justify-evenly flex flex-col shadow-lg resources-responsive m-1.5 border-2 hover:bg-blue-50 border-blue-900 p-2 rounded-md transition-linear duration-300">
+
+                    <h1 class="text-xl text-blue-800 font-bold"> `+ book.title +`</h1>
+            
+                    <hr class="border border-dashed border-blue-900 my-2">
+            
+                    <img src="https://covers.openlibrary.org/b/isbn/`+ book.isbn +`-M.jpg" class="mx-auto h-48" alt="">
+            
+                    <h3 class="self-end text-white text-sm bg-blue-700 mt-1 mb-0.5 p-1 w-full">Author:`+  book.authors +`</h3>
+            
+                </a>`
+            }
+            BtnDisable(false)
+            }
+            else
+            {
+                document.getElementById("loader").style.display = "none"
+                document.getElementById("booksContent").innerHTML += `<h1 class="text-xl text-red-700 mt-2 font-bold"> No books found</h1>`
+                BtnDisable(true)
+                document.getElementById("bookBtnOne").disabled = false
+            }
+
+          });
+    }
+    }
+
+    function filter(){
+        document.getElementById("filter").classList.toggle("hidden")
+    }
+
+    function search(){
+        getBooks(1-page_number)
+        filter()
+    }
+
+</script>
+{% endblock %}
+
+{% block title %}
+Browse 🔎
+{% endblock %}
+r
+{% block content %}
+
+<div class="fixed right-0 bottom-5 text-white flex flex-col px-1">
+    <div id="filter" class="border bg-blue-900 mr-2 p-3 flex flex-col flex-wrap rounded-lg hidden">
+        <div class="my-1">Title: <input id="title" value="" placeholder="Book title" type="text" class="text-blue-900 py-1 px-2 rounded-md focus:border focus:border-blue-700" type="text"></div>
+        <div class="my-1">Author: <input id="author" value="" placeholder="Book author" type="text" class="text-blue-900 py-1 px-2 rounded-md focus:border focus:border-blue-700" type="text"></div>
+        <div><button onclick="search()" class="bg-white text-blue-900 m-2 p-1 rounded-lg">Search</button></div>
+        <div id="bookPage" class="text-white border-2 mx-2 border-blue-300 rounded-lg p-2">
+            <div class="flex justify-evenly">
+              Page: 
+              <div><button id="bookBtnOne" onclick="getBooks(-1)" class="text-sm bg-blue-400 px-1 py-0.5 rounded-md">Prev</button></div>
+              <div id="pageNumber" class="px-1">1</div>
+              <div><button id="bookBtnTwo" onclick="getBooks(1)" class="text-sm bg-blue-400 px-1 py-0.5 rounded-md">Next</button></div>
+            </div>
+        </div>
+    </div>
+    <div> <button onclick="filter()" class="mr-5 mt-5 float-right rounded-full px-4 py-2 bg-blue-900">Filter</button></div>
+</div>
+
+
+<div id="booksContent" class="mx-auto flex flex-wrap justify-around">
+
+</div>
+
+<div id="loader" class="hidden">
+    <div class="w-3/4 mx-auto flex flex-col md:flex-row lg:flex-row items-center justify-center px-4 py-2 border border-transparent text-2xl font-bold rounded-md text-white bg-blue-700 
+transition ease-in-out duration-150 cursor-not-allowed">
+<div class="mr-2">Loading</div>
+<div><svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg></div>
+</div>
+</div>
+
+
+{% endblock %}

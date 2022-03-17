@@ -1,0 +1,45 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+
+    document.getElementById("pay").classList.remove("bg-blue-900")
+    document.getElementById("pay").classList.add("bg-blue-500")
+    document.getElementById("pay-icon").classList.remove("text-blue-600")
+
+</script>
+{% endblock %}
+
+{% block title %}
+Payment History
+{% endblock %}
+
+{% block content %}
+
+<table id="userTable" class="w-full flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+
+  <tr class="text-white bg-blue-700">
+    <th class="p-3 text-left">Id</th>
+    <th class="p-3 text-left">Member</th>
+    <th class="p-3 text-left">Amount</th>
+    <th class="p-3 text-left">Date</th>
+  </tr>
+
+    <tbody id="usersTableContent">
+      
+      {% for payment in payments %}
+
+      <tr id="{{ payment.id }}" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+        <td class="border-blue-900 border p-2 text-center">{{ payment.id }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ payment.member_id }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ payment.amount }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ payment.date.date() }}</td>
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+{% endblock %}

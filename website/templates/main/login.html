@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block main %}
+
+{% if alert %}
+<p id="alert" class="rounded-md font-bold text-xl italic bg-green-100 text-green-700 mt-3 mx-4 p-2">{{ alert }}<button
+        onclick="clearalert()" class="text-white bg-gray-500 rounded-full float-right px-2 hover:bg-gray-600"> X
+    </button></p>
+{% endif %}
+
+{% if error %}
+<p id="alert" class="rounded-md font-bold text-xl italic bg-red-100 text-red-700 mt-3 mx-4 p-2">{{ error }}<button
+        onclick="clearalert()" class="fixed text-white bg-gray-500 rounded-full right-0 mr-6 px-2 hover:bg-gray-600"> X
+    </button></p>
+{% endif %}
+
+<div class="flex flex-col lg:flex-row md:flex-row xl:flex-row justify-center pb-8">
+
+    <div class="text-center w-full lg:w-1/2 md:w-3/5 mr-2 self-center">
+        
+        <img src="{{ url_for('static', filename='login.svg')}}">
+        
+    </div>
+
+    <div class="px-2 text-center self-center">
+        
+        <span class="text-2xl font-bold dark:text-white">Library Management System</span>
+        <div class="relative mt-4 bg-white shadow-lg sm:rounded-lg text-left dark:bg-gray-200 rounded-t-md ">
+            <div class="h-3 bg-blue-700 dark:bg-blue-400 rounded-t-md"></div>
+
+            <form method="post" onsubmit="return validateForm()" name="login">
+                <div class="py-6 px-8 pt-2">
+                    <p id="form-error" class="text-red-500 text-base italic mb-3 bg-red-50 rounded-md"></p>
+
+                    <label class="block font-semibold ">First Name<sup class="text-xs font-bold text-red-600">*</sup><label>
+                            <input autocomplete="off" type="text" placeholder="First Name" name="fname"
+                                class=" border-2 w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:border-blue-600 rounded-md">
+                            <label class="block mt-3 font-semibold"> Last Name <sup
+                                    class="text-xs font-bold text-red-600">*</sup><label>
+                                    <input autocomplete="off" type="text" placeholder="Last Name" name="lname"
+                                        class="border-2 w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:border-blue-600 rounded-md">
+                                        <label class="block mt-3 font-semibold">Password <sup
+                                            class="text-xs font-bold text-red-600">*</sup><label>
+
+                                                <div class="w-full flex items-center">
+                                                    <div class="w-11/12">
+                                                        <input type="password" placeholder="LMS Admin Password" name="pswd"
+                                                class="border-2 w-full h-5 px-3 py-5 mt-2 hover:outline-none focus:outline-none focus:border-blue-600 rounded-md">
+                                                    </div>
+                                                    <div class="w-1/12">
+                                                        <span onclick="passEye(this)" class="w-full mt-2 p-2 fas fa-eye-slash text-xl"></span>
+                                                    </div>
+                                                </div>
+                                           
+                                        
+                                                <div class="flex justify-between items-baseline">
+                                        <button type="submit"
+                                            class="mt-4 bg-blue-700 text-white py-1 px-2 font-semibold rounded-lg hover:bg-blue-800"><span
+                                                class="text-lg">Login <i class="fas text-xl fa-hand-point-right"></i></span></button>
+                                        <a href="#"
+                                            class="text-sm text-blue-700 hover:bg-blue-100 hover:underline">Forgot
+                                            password?</a>
+                                    </div>
+                                    <hr class="my-4 border-2 border-blue-700">
+                                    <span class="text-lg">Are you a Member ? <a href="/books/browse"
+                                            class="text-blue-700 hover:bg-blue-100 hover:underline">Browse books</a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    function passEye(btn)
+    {
+        if(btn.classList.contains('fa-eye-slash'))
+        {
+            btn.classList.remove('fa-eye-slash');
+            btn.classList.add('fa-eye');
+            document.forms["login"]["pswd"].type = 'text';
+        }
+        else
+        {
+            btn.classList.remove('fa-eye');
+            btn.classList.add('fa-eye-slash');
+            document.forms["login"]["pswd"].type = 'password';
+        }
+    }
+
+    function validateForm() {
+        var fname = document.forms["login"]["fname"];
+        var lname = document.forms["login"]["lname"];
+        var pswd = document.forms["login"]["pswd"];
+
+        if (fname.value == "" || lname.value == "" || pswd.value == "") {
+            document.getElementById("form-error").innerHTML = "Please Fill all * Feilds";
+            document.getElementById("form-error").classList.add("p-1.5");
+
+            if (lname.value == "") {
+                lname.classList.add("border-red-600");
+            }
+            if (fname.value == "") {
+                fname.classList.add("border-red-600");
+            }
+            if (pswd.value == "") {
+                pswd.classList.add("border-red-600");
+            }
+
+            return false;
+        }
+        return true;
+    }
+</script>
+
+{% endblock %}

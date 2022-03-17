@@ -1,0 +1,305 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+  var id = ''
+  var ids = []
+
+  document.getElementById("books").classList.remove("bg-blue-900")
+  document.getElementById("books").classList.add("bg-blue-500")
+  document.getElementById("books-icon").classList.remove("text-blue-600")
+
+  function checker(Bid) {
+    id = Bid
+    document.getElementById(id).classList.add("bg-red-500")
+    document.getElementById('confirmBox').classList.remove("hidden")
+  }
+
+  function resetSelectAll() {
+    temp = document.getElementById('selectAllMain')
+    temp.checked = false
+    SelectAll(temp)
+  }
+
+  function deleteAll() {
+    var books = []
+    var checkboxes = document.querySelectorAll('input[name="selectBook"]:checked')
+    console.log(checkboxes)
+    for (var i = 0; i < checkboxes.length; i++) {
+      books.push(checkboxes[i].value)
+    }
+    check = window.confirm("Are you sure you want to delete " + books.length + " books?")
+    if (check) {
+      deleteBooks(books)
+    }
+    else {
+      resetSelectAll()
+    }
+  }
+
+  function SelectAll(source) {
+    checkboxes = document.getElementsByName('selectBook');
+    for (var i = 0, n = checkboxes.length; i < n; i++) {
+      checkboxes[i].checked = source.checked;
+    }
+  }
+
+  function changeBookQuantity(val) {
+    var quantity = parseInt(document.getElementById('bookQuantity').innerHTML)
+    document.getElementById('bookQuantity').innerHTML = quantity - val
+  }
+
+  function deleteBook(confirm) {
+    document.getElementById('confirmBox').classList.add("hidden")
+    if (confirm) {
+      fetch('/books/delete-book', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          id: id
+        })
+      }).then(function (response) {
+        return response.json();
+      }).then(function (data) {
+        if (data.success) {
+          document.getElementById(id).remove();
+          changeBookQuantity(1)
+        }
+      });
+    }
+    else {
+      document.getElementById(id).classList.remove("bg-red-500")
+    }
+  };
+
+  function deleteBooks(books) {
+    fetch('/books/delete-books', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        ids: books
+      })
+    }).then(function (response) {
+      return response.json();
+    }).then(function (data) {
+      if (data.success) {
+        for (var i = 0; i < books.length; i++) {
+          document.getElementById(books[i]).remove();
+        }
+
+        changeBookQuantity(books.length)
+        resetSelectAll()
+      }
+    });
+  };
+
+
+
+  function searchBookByCode(code) 
+  {
+    const type = parseInt(document.getElementById('searchBy').value)
+    const table = document.getElementById('booksTableContent')
+    var rows = table.getElementsByTagName('tr')
+    if(type == 2){
+      code = code.toUpperCase()
+    }
+    for (var i = 0; i < rows.length; i++)
+     {
+
+      if (code == '') {
+        rows[i].classList.remove("hidden")
+      }
+      else {
+        cells = rows[i].getElementsByTagName('td')
+        value = cells[type].textContent
+        if(type == 2){
+          value = value.toUpperCase()
+        }
+          if (value.startsWith(code)) 
+          {
+            if(rows[i].classList.contains("hidden"))
+            {
+              rows[i].classList.remove("hidden")
+              rows[i].classList.add("table-row")
+            }
+          }
+          else 
+          {
+            if(!(rows[i].classList.contains("hidden")))
+            {
+              rows[i].classList.remove("table-row")
+              rows[i].classList.add("hidden")
+            }
+          }
+      }
+    
+     }
+  }
+
+  function selectTypeChange(type)
+  {
+    const searchInput = document.getElementById('searchInput')
+    type = parseInt(type)
+    if(type == 0){
+      searchInput.placeholder = "Search by Book ID"
+    }
+    else if(type == 1){
+      searchInput.placeholder = "Search by Book Code"
+    }
+    else if(type == 2){
+      searchInput.placeholder = "Search by Book title"
+    }
+
+    searchBookByCode(searchInput.value)
+  }
+
+</script>
+{% endblock %}
+
+{% block title %}
+Books
+{% endblock %}
+
+{% block content %}
+
+<div id="confirmBox" class="hidden fixed z-10 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog"
+  aria-modal="true">
+  <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+    <div
+      class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+      <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+        <div class="sm:flex sm:items-start">
+          <div
+            class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+              Delete Book
+            </h3>
+            <div class="mt-2">
+              <p class="text-sm text-gray-500">
+                Are you sure you want to Delete this book? This action cannot be undone.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <button onclick="deleteBook(true)" type="button"
+          class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
+          Delete
+        </button>
+        <button onclick="deleteBook(false)" type="button"
+          class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class=" mx-2 flex items-center justify-center">
+  <div class="container">
+
+    {% if books|length == 0 %}
+    <div
+      class="w-11/12 py-2 text-center bg-red-100 mx-auto border-2 border-red-600 text-red-800 text-2xl font-bold rounded-md">
+      No books in Database <a href="/books/import"
+        class="bg-red-700 px-2 py-1 text-white rounded-full text-xl hover:bg-red-800">+Add</a>
+    </div>
+
+    {% else %}
+
+    <div class="mx-auto w-full flex flex-wrap items-center justify-around flex-col md:flex-row">
+
+      <div class="w-full lg:w-1/2 my-2 flex justify-evenly">
+        <select onchange="selectTypeChange(this.value)" class="bg-blue-700 font-bold text-white" id="searchBy">
+          <option value="0">Book Id</option>
+          <option value="1" selected>Book code</option>
+          <option value="2">Book title</option>
+        </select>
+
+        <input id="searchInput" type="text" onkeyup="searchBookByCode(this.value)" placeholder="Search by Book Code"
+          class="w-2/3 px-1 py-1.5 rounded-lg border-2 border-blue-700 ring-blue-200">
+        </span>
+      </div>
+
+      <div class="w-full lg:w-1/2 my-2 md:my-0 flex justify-center">
+        <div class="border-2 border-blue-700 rounded-lg px-2 py-1.5">
+          Books: <span id="bookQuantity">{{ books|length }}</span>
+        </div>
+
+        <div class="ml-2 border-2 border-blue-700 rounded-lg px-2 py-1.5">
+          Select
+          <input type="checkbox" id="selectAllMain" onclick="SelectAll(this)"
+            class="form-checkbox h-5 w-5 text-red-600">
+        </div>
+        <div>
+          <button onclick="deleteAll()"
+          class="ml-2 py-1.5 px-2 border-red-600 border-2 rounded-xl border bg-red-700 text-white hover:bg-red-900"><i
+            class="fas fa-trash-alt"></i> Delete All</button>
+        </div>
+      </div>
+    </div>
+
+    <table id="bookTable" class="w-full flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+
+      <tr
+      class="text-white bg-blue-700">
+      <th class="p-3 text-left">Id</th>
+      <th class="p-3 text-left">Code</th>
+      <th class="p-3 text-left">Title</th>
+      <th class="p-3 text-left hidden md:table-cell">Quantity</th>
+      <th class="p-3 text-left">Actions</th>
+    </tr>
+
+      <tbody id="booksTableContent">
+
+        {% for book in books %}
+
+        <tr id="{{ book.id }}"
+          class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+          <td class="border-blue-900 border p-2 text-center">{{ book.id }}</td>
+          <td class="border-blue-900 border p-2 text-center"><span id="bookcode">{{ book.book_id }}</span></td>
+          <td class="border-blue-900 border p-2 ">{{ book.title }}</td>
+          {% set remaining = book.quantity - book.issued %}
+          <td class="border-blue-900 border p-2 text-center hidden md:table-cell">{{ remaining }}/{{ book.quantity }}</td>
+          <td class="border-blue-900 p-1 text-base flex flex-col md:flex-row items-center justify-evenly">
+            <div>
+              <input type="checkbox" name="selectBook" value="{{ book.id }}" class="h-5 w-8">
+            </div>
+            <button onclick="checker('{{ book.id }}')"
+              class="mb-1 md:mr-1 text-lg py-1 px-2 border-red-600 border rounded-xl bg-red-700 text-white hover:bg-red-900">
+              <i class="fas fa-trash"></i>
+            </button>
+
+            <a href="/books/book/{{book.book_id}}"
+              class="text-center text-lg py-1 px-2 border-green-600 border rounded-xl bg-green-700 text-white hover:bg-green-900">
+              <i class="fas fa-edit"></i>
+            </a>
+          </td>
+        </tr>
+
+        {% endfor %}
+
+      </tbody>
+
+    </table>
+
+    
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

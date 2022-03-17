@@ -1,0 +1,55 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+
+    document.getElementById("transaction").classList.remove("bg-blue-900")
+    document.getElementById("transaction").classList.add("bg-blue-500")
+    document.getElementById("transaction-icon").classList.remove("text-blue-600")
+</script>
+{% endblock %}
+
+{% block title %}
+Book Transactions
+{% endblock %}
+{% block content %}
+
+<table id="userTable" class="w-full flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+
+    <tr
+    class="text-white bg-blue-700">
+    <th class="p-3 text-left">Id</th>
+    <th class="p-3 text-left">Member Id</th>
+    <th class="p-3 text-left">Book Id</th>
+    <th class="p-3 text-left">Rent (<i class="fas fa-rupee-sign"></i>)</th>
+    <th class="p-3 text-left">Issued</th>
+    <th class="p-3 text-left">Status</th>
+  </tr>
+
+    <tbody id="usersTableContent">
+
+      {% for t in transactions %}
+
+      <tr id="{{ t.id }}" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+        <td class="border-blue-900 border p-2 text-center">{{ t.id }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ t.member_id }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ t.book_id }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ t.rent }}</td>
+        <td class="border-blue-900 border p-2 text-center">{{ t.issued.date() }}</td>
+        <td class="border-blue-900 border p-2 text-center">
+          {% if t.status %}
+          Active
+          {% else %}
+          Returned
+          {% endif %}
+        </td>
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+{% endblock %}

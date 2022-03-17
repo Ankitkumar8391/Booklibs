@@ -1,0 +1,201 @@
+{% extends "template.html" %}
+
+{% block script %}
+<script>
+
+    function toggleOnSubmit(){
+        document.getElementById("loader").classList.toggle("hidden")
+        document.getElementById("btnGetBooks").classList.toggle("hidden")
+    }
+
+    function addBooks()
+    {
+        bookTitle = document.getElementById("bookTitle").value;
+        bookAuthor = document.getElementById("bookAuthor").value;
+        bookPublisher = document.getElementById("bookPublisher").value;
+        bookQuantity = document.getElementById("bookQuantity").value;
+        bookQuantityPerBook = document.getElementById("bookQuantityPerBook").value;
+        result = document.getElementById("result");
+
+        if(bookQuantity <= 0 )
+        {
+            result.innerHTML = "no books to be added";
+        }
+        else
+        {
+            toggleOnSubmit()
+            result.innerHTML = "Adding "+bookQuantity+" books";
+            fetch('/books/add-books' , {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    title: bookTitle,
+                    author: bookAuthor,
+                    publisher: bookPublisher,
+                    quantity: bookQuantity,
+                    perbook: bookQuantityPerBook
+                })
+            }).then(function (response) 
+            {
+                if(response.status == 200)
+                {
+                    return response.json();
+                }
+                else
+                {
+                    result.innerHTML = "Error adding books | Insufficient Quantity";
+                }
+            }).then(function (data) {
+                    result.innerHTML = data.added + "/" + bookQuantity + " Books added";
+                    toggleOnSubmit()
+            });
+        }
+    }
+
+    document.getElementById("import").classList.remove("bg-blue-900")
+    document.getElementById("import").classList.add("bg-blue-500")
+    document.getElementById("import-icon").classList.remove("text-blue-600")
+
+    function decrement(e) 
+    {
+      const btn = e.target.parentNode.parentElement.querySelector(
+        'button[data-action="decrement"]'
+      );
+      const target = btn.nextElementSibling;
+      let value = Number(target.value);
+        if (value > 1){
+            value--;
+            target.value = value;
+        }
+    }
+  
+    function increment(e) {
+      const btn = e.target.parentNode.parentElement.querySelector(
+        'button[data-action="decrement"]'
+      );
+      const target = btn.nextElementSibling;
+      let value = Number(target.value);
+      value++;
+      target.value = value;
+    }
+  
+    const decrementButtons = document.querySelectorAll(
+      `button[data-action="decrement"]`
+    );
+  
+    const incrementButtons = document.querySelectorAll(
+      `button[data-action="increment"]`
+    );
+  
+    decrementButtons.forEach(btn => {
+      btn.addEventListener("click", decrement);
+    });
+  
+    incrementButtons.forEach(btn => {
+      btn.addEventListener("click", increment);
+    });
+  </script>
+{% endblock %}
+
+{% block title %}
+Import Books
+{% endblock %}
+
+{% block content %}
+
+<div class="mt-2 mx-2 text-xl text-black divide-y-2 divide-dashed divide-blue-900">
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="title" class="mr-1 font-bold ">Title:</label>
+        <input id="bookTitle"
+            class="text-black w-full md:w-2/3 py-1 px-2 rounded-lg border-2 border-blue-900 border-solid focus:border-double focus:border-4"
+            type="text" placeholder="Book Title">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="author" class="mr-1 font-bold ">Author:</label>
+        <input id="bookAuthor"
+            class="text-black w-full md:w-2/3 py-1 px-2 rounded-lg border-2 border-blue-900 border-solid focus:border-double focus:border-4"
+            type="text" placeholder="Book Author">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+        <label for="publisher" class="mr-1 font-bold ">Publisher:</label>
+        <input id="bookPublisher"
+            class="text-black w-full md:w-2/3 py-1 px-2 rounded-lg border-2 border-blue-900 border-solid focus:border-double focus:border-4"
+            type="text" placeholder="Book Publisher">
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-evenly items-center py-4 px-2 rounded-md">
+
+        <label for="title" class="mr-1 font-bold">Quantity:</label>
+        <!-- component -->
+        <div class="w-full md:w-2/3 flex flex-col md:flex-row justify-between">
+            <div class="w-full md:w-1/2 flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
+                <button data-action="decrement"
+                    class=" bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-l cursor-pointer outline-none">
+                    <span class="m-auto text-2xl font-bold">−</span>
+                </button>
+                <input type="number" id="bookQuantity"
+                    class="outline-none focus:outline-none text-center w-full bg-blue-300 font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center text-blue-700  outline-none"
+                    name="custom-input-number" value="1">
+                <button data-action="increment"
+                    class="bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-r cursor-pointer">
+                    <span class="m-auto text-2xl font-bold">+</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="flex flex-col md:flex-row justify-around items-center py-4 px-2 rounded-md">
+
+        <label for="title" class="mr-1 font-bold">Quantity per Book:</label>
+        <!-- component -->
+        <div class="w-full md:w-2/3 flex flex-col md:flex-row justify-between">
+            <div class="w-full md:w-1/2 flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
+                <button data-action="decrement"
+                    class=" bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-l cursor-pointer outline-none">
+                    <span class="m-auto text-2xl font-bold">−</span>
+                </button>
+                <input type="number" id="bookQuantityPerBook"
+                    class="outline-none focus:outline-none text-center w-full bg-blue-300 font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center text-blue-700  outline-none"
+                    name="custom-input-number" value="1">
+                <button data-action="increment"
+                    class="bg-blue-300 text-blue-600 hover:text-blue-700 hover:bg-blue-400 h-full w-20 rounded-r cursor-pointer">
+                    <span class="m-auto text-2xl font-bold">+</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="btnGetBooks" class="flex justify-center my-2 items center">
+    <button onclick="addBooks()" class="w-4/5 border-2 py-2 border-blue-700 font-bold text-2xl rounded-full hover:bg-blue-700 hover:text-white">Add Books</button>
+</div>
+
+<div id="loader" class="hidden my-2">
+    <div class="w-3/4 mx-auto flex flex-col md:flex-row lg:flex-row items-center justify-center px-4 py-2 border border-transparent text-2xl font-bold rounded-full text-white bg-blue-700 
+transition ease-in-out duration-150 cursor-not-allowed">
+<div class="mr-2">Processing</div>
+<div><svg class="animate-spin h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+</svg></div>
+</div>
+</div>
+
+<p id="result" class="w-full text-center">Result will appear here</p>
+
+<style>
+    input[type='number']::-webkit-inner-spin-button,
+    input[type='number']::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+</style>
+
+{% endblock %}

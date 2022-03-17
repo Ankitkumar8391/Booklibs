@@ -1,0 +1,203 @@
+{% extends "template.html" %}
+
+
+{% block title %}
+Member #{{ user.id }}
+{% endblock %}
+
+
+{% block script %}
+<script>
+
+    document.getElementById("user").classList.remove("bg-blue-900")
+    document.getElementById("user").classList.add("bg-blue-500")
+    document.getElementById("user-icon").classList.remove("text-blue-600")
+
+
+    function addCredit() {
+        credit = document.getElementById("value").value
+        console.log(credit)
+        if(credit == "") 
+        return
+        if (credit < 100) 
+        document.getElementById('result').innerHTML = "You can't add less than 100 credits"
+        else{
+            fetch('/members/payments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    amount: credit,
+                    id: {{ user.id }}
+                })
+            }).then(res => res.json())
+                .then(data => {
+                    if(data.code == 200)
+                    {
+                        document.getElementById('result').innerHTML = `Added <i class="fas fa-rupee-sign"></i>${credit} To the Users Account`
+                        document.getElementById('userCredit').innerHTML = parseInt(document.getElementById('userCredit').innerHTML) + parseInt(credit)
+                        document.getElementById('value').value = ""
+                        const t = data.payment
+                        var date = new Date(t.date)
+                        date = date.toISOString().substring(0, 10);
+                        row = ` <tr id="${ t.id }" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+                            <td class="border-blue-900 border p-2 text-center">${t.id }</td>
+                            <td class="border-blue-900 border p-2 text-center">${ t.amount }</td>
+                            <td class="border-blue-900 border p-2 text-center">${ date }</td>
+                        </tr>`
+                        document.getElementById('usersPaymentTableContent').innerHTML += row
+                    }
+                    else
+                    {
+                        document.getElementById('result').innerHTML = data.message
+                    }
+                })
+        }
+    }
+
+    function returnBook(id)
+      {
+        fetch('/members/transactions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: id,
+              status: false
+            })
+          }).then(function (response) {
+            return response.json();
+          }).then(function (data) {
+              if(data.code == 200)
+              {
+                const t = data.msg
+                var date = new Date(t.issued)
+                date = date.toISOString().substring(0, 10);
+                cells = document.getElementById(id).getElementsByTagName('td')
+                cells[4].innerHTML = "Returned"
+                cells[5].innerHTML = date
+              }
+              else{
+                  document.getElementById('result').innerHTML = data.msg
+              }
+          });
+      }
+
+</script>
+{% endblock %}
+
+
+{% block content %}
+<div class="mx-2">
+    {% if user %}
+
+    <div class="flex flex-col md:flex-row justify-evenly">
+        <div class="w-full md:w-1/3 lg:w-1/3 flex justify-center items-center">
+            <img src="https://ui-avatars.com/api/?color=ffffff&background=1E3A8A&name={{ user.name }}&bold=true&size=128"
+                class="rounded-full">
+        </div>
+        <div class="w-full md:w-2/3 flex justify-evenly flex-col items-center mt-4 md:mt-0">
+            <table class="border-collapse border border-black p-1 px-2 p-2">
+                <tr>
+                    <td class="border border-black p-1 px-2 font-bold">Name</td>
+                    <td class="border border-black p-1 px-2 ">{{ user.name }}</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 px-2 font-bold">Email Id</td>
+                    <td class="border border-black p-1 px-2 ">{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 px-2 font-bold">Credits</td>
+                    <td id="userCredit" class="border border-black p-1 px-2">{{ user.credit }}</td>
+                </tr>
+                <tr>
+                    <td class="border border-black p-1 px-2 font-bold">Since</td>
+                    <td class="border border-black p-1 px-2 ">{{ user.created.date() }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <hr class="mt-2">
+    <div class="mt-4">
+
+
+        <div class="flex flex-col lg:flex-row my-2">
+            <input id="value" class="border-2 border-blue-900 text-black rounded mr-1 py-1 px-2" type="integer"
+                placeholder="Credit">
+            <button onclick="addCredit()"
+                class="py-1 px-2 bg-blue-900 shadow-md text-white rounded text-lg hover:bg-blue-800">Add</button>
+            <p class="py-1 px-2" id="result">You can add a Minimum of <i class="fas fa-rupee-sign"></i>100, Max allowance till you reach a <i class="fas fa-rupee-sign"></i>500 balance
+        </div>
+
+
+        <div class="w-full text-xl bg-blue-900 text-white text-center py-1 mt-4 rounded-md">Issued Books</div>
+
+        <table id="userTable" class="w-full flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+            <tr class="text-white bg-blue-700">
+                <th class="p-2 text-left">Id</th>
+                <th class="p-2 text-left border-l ">Book</th>
+                <th class="p-2 text-left border-l ">Issued</th>
+                <th class="p-2 text-left border-l">Rent (<i class="fas fa-rupee-sign"></i>)</th>
+                <th class="p-2 text-left border-l">Status</th>
+                <th class="p-2 text-left border-l">Return</th>
+            </tr>
+
+            <tbody id="usersTableContent">
+
+                {% for t in user.books %}
+
+                <tr id="{{ t.id }}" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+                    <td class="border-blue-900 border p-2 text-center">{{ t.id }}</td>
+                    <td class="border-blue-900 border p-2 text-center">{{ t.book_id }}</td>
+                    <td class="border-blue-900 border p-2 text-center">{{ t.issued.date() }}</td>
+                    <td class="border-blue-900 border p-2 text-center">{{ t.rent }}</td>
+                        {% if t.status %}
+                        <td class="border-blue-900 border p-2 text-center">Active</td>
+                        <td class="border-blue-900 border p-2 text-center"><button onclick="returnBook({{ t.id }})"class="text-white rounded-md font-bold px-2 hover:bg-red-600 py-1 bg-red-700">Return</button></td>
+                        {% else %}
+                        <td class="border-blue-900 border p-2 text-center">Returned</td>
+                        <td class="border-blue-900 border p-2 text-center">{{ t.returned.date() }}</td>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+        <div class="w-full text-xl bg-blue-900 text-white text-center py-1 mt-4 rounded-md">Payments</div>
+
+        <table id="userTable" class="w-full flex-no-wrap sm:bg-white overflow-hidden sm:shadow-lg my-5">
+            <tr class="text-white bg-blue-700">
+                <th class="p-2 text-left">Id</th>
+                <th class="p-2 text-left border-l ">Amount (<i class="fas fa-rupee-sign"></i>)</th>
+                <th class="p-2 text-left border-l ">Date</th>
+            </tr>
+
+            <tbody id="usersPaymentTableContent">
+
+                {% for t in user.payments %}
+
+                <tr id="{{ t.id }}" class="border-blue-900 border-2 border-t-0 mb-2 sm:mb-0 hover:bg-blue-50 mb-2">
+                    <td class="border-blue-900 border p-2 text-center">{{ t.id }}</td>
+                    <td class="border-blue-900 border p-2 text-center">{{ t.amount }}</td>
+                    <td class="border-blue-900 border p-2 text-center">{{ t.date.date() }}</td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+    {% else %}
+    <div class="text-center">
+        <h1 class="text-3xl font-bold">user not found</h1>
+        <a href="/users" class="text-blue-500 hover:text-blue-600">Go back</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

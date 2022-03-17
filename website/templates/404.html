@@ -1,0 +1,54 @@
+{% if "logged_in" in session %}
+
+{% extends "template.html"%}
+
+{% block title %}
+Error 404
+{% endblock %}
+
+{% block content %}
+<div class="flex w-full items-center content-center justify-center">
+    <img src="{{ url_for('static', filename='404.svg')}}" class="bg-red-50 rounded-md">
+</div>
+
+<div class="mt-2 py-2 text-center bg-red-50 rounded-lg text-red-700 font-bold text-xl">The Page you are trying to view does not exist.</div>
+{% endblock %}
+
+{% else %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <title>Library | 404</title>
+</head>
+<body class="antialiased font-body text-body font-mono ">
+    <div class="flex flex-col lg:flex-row md:flex-row xl:flex-row justify-center items-center min-h-screen bg-red-50">
+
+        <div class="w-11/12 lg:w-1/2 md:w-3/5 mr-2 self-center">
+            <img src="{{ url_for('static', filename='404.svg')}}">
+        </div>
+        
+        <div class="px-2 text-center self-center">
+            <span class="text-2xl font-bold dark:text-white">Error 404</span>
+            <div class="relative mt-4 bg-white shadow-lg base:rounded-lg text-left dark:bg-gray-200 rounded-t-md ">
+                 <div class="h-3 bg-red-700 dark:bg-red-400 rounded-t-md"></div>
+                    <div class="py-6 px-8 pt-2">
+                        <span class="text-base">Return back to</span>
+                        <button onclick="window.location.href='/books/browse'"class="mt-4 bg-red-700 text-white py-1 px-2 font-semibold rounded-lg hover:bg-red-800">safety -></button>
+                    <hr class="my-4 border-2 border-red-700">
+                        <span class="text-base">Are you a Librarian ? 
+                            <a href="/" class="text-red-700 hover:bg-red-100 hover:underline">Login</a>
+                        </span>
+                    </div>
+            </div>
+        </div>
+        
+        </div>
+</body>
+</html>
+
+{% endif %}

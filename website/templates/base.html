@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Library | {% block title %} {% endblock %} </title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+  <style>
+    @media (min-width: 768px) { 
+      .resources-responsive
+      {
+        width:32% 
+      }
+    }
+    @media (min-width: 640px) { 
+      .resources-responsive
+      {
+        width:30% 
+      }
+    }
+
+    @media (min-width: 1024px) { 
+      .resources-responsive
+      {
+        width:23.5% 
+      }
+    }
+
+</style>
+</head>
+
+<body class="antialiased font-body text-body font-mono">
+
+{% block main %} {% endblock %}
+ 
+<script>
+  function clearalert() 
+  {
+    document.getElementById("alert").style.display = "none";
+  }
+</script>
+
+</body>
+
+</html>
